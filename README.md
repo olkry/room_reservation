@@ -6,5 +6,6 @@ pip install aiosqlite==0.20.0
 
 pip install "sqlalchemy[asyncio]==2.0.30" 
 
-pip install alembic==1.13.1 
-alembic init --template async alembic
+pip install alembic==1.13.1  
+alembic init --template async alembic  
+alembic revision --autogenerate -m "First migration" 
