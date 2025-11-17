@@ -1,8 +1,19 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
-class MeetingRoomCreate(BaseModel):
-    name: str = Field(max_length=100, title='Название', )
+class MeetingRoomBase(BaseModel):
+    name: Optional[str] = Field(
+        None, min_length=1, max_length=100, title='Название')
     description: Optional[str] = None
+
+
+class MeetingRoomCreate(MeetingRoomBase):
+    name: str = Field(min_length=1, max_length=100)
+
+
+class MeetingRoomDB(MeetingRoomBase):
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
