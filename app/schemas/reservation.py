@@ -8,6 +8,8 @@ class ReservationBase(BaseModel):
     from_reserve: datetime
     to_reserve: datetime
 
+    model_config = ConfigDict(extra='forbid')
+
 
 class ReservationUpdate(ReservationBase):
     @field_validator('from_reserve')
