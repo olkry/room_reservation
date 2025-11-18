@@ -11,3 +11,8 @@ class Reservation(CommonMixin, Base):
     to_reserve: Mapped[datetime] = mapped_column(DateTime)
     meetingroom_id: Mapped[int] = mapped_column(Integer,
                                                 ForeignKey('meetingroom.id'))
+
+    def __repr__(self):
+        return (
+            f'Забронировано с {self.from_reserve} по {self.to_reserve}'
+        )
