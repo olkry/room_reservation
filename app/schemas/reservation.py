@@ -1,14 +1,33 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from pydantic import BaseModel, ConfigDict, model_validator, field_validator
+from pydantic import (
+    BaseModel, ConfigDict, Field, field_validator, model_validator
+)
 from typing_extensions import Self
+
+# Представить объект datetime в виде строки с точностью до минут.
+FROM_TIME = (
+    datetime.now() + timedelta(minutes=10)
+).isoformat(timespec='minutes')
+
+TO_TIME = (
+    datetime.now() + timedelta(hours=1)
+).isoformat(timespec='minutes')
 
 
 class ReservationBase(BaseModel):
-    from_reserve: datetime
-    to_reserve: datetime
+    from_reserve: datetime = Field(..., examples=[FROM_TIME])
+    to_reserve: datetime = Field(..., examples=[TO_TIME])
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(
+        extra='forbid',
+        # json_schema_extra={
+        #     'example': {
+        #         'from_time': '2028-04-24T11:00',
+        #         'to_time': '2028-04-24T12:00'
+        #     }
+        # }
+    )
 
 
 class ReservationUpdate(ReservationBase):
