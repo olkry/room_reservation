@@ -13,6 +13,8 @@ from app.schemas.meeting_room import (
 )
 from app.core.db import get_async_session
 from .validators import check_meeting_room_exists, check_name_duplicate
+from app.crud.reservation import reservation_crud
+from app.schemas.reservation import ReservationDB
 
 # router = APIRouter(
 #     prefix='/meeting_rooms',
@@ -84,3 +86,18 @@ async def remove_meeting_room(
     # meeting_room = await delete_meeting_room(meeting_room, session) До CRUD ред.
     meeting_room = await meeting_room_crud.remove(meeting_room, session)
     return meeting_room
+
+
+@router.get(
+    '/{meeting_room_id}/reservations',
+    response_model=list[ReservationDB]
+)
+async def get_reservations_for_room(
+        meeting_room_id: int,
+        session: SessionDep,
+):
+    await check_meeting_room_exists(meeting_room_id, session)
+    reservations = await reservation_crud.get_future_reservations_for_room(
+        room_id=meeting_room_id, session=session
+    )
+    return reservations
