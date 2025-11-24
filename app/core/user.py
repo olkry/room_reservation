@@ -84,13 +84,15 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         # или переадресацию пользователя на определённую страницу.
         print(f'Пользователь {user.email} зарегистрирован.')
 
-    # Корутина, возвращающая объект класса UserManager.
-    async def get_user_manager(user_db=Depends(get_user_db)):
-        yield UserManager(user_db)
 
-    fastapi_users = FastAPIUsers[User, int](
-        get_user_manager,
-        [auth_backend],
-    )
-    current_user = fastapi_users.current_user(active=True)
-    current_superuser = fastapi_users.current_user(active=True, superuser=True)
+# Корутина, возвращающая объект класса UserManager.
+async def get_user_manager(user_db=Depends(get_user_db)):
+    yield UserManager(user_db)
+
+
+fastapi_users = FastAPIUsers[User, int](
+    get_user_manager,
+    [auth_backend],
+)
+current_user = fastapi_users.current_user(active=True)
+current_superuser = fastapi_users.current_user(active=True, superuser=True)
