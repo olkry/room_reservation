@@ -22,3 +22,6 @@ alembic revision --autogenerate -m "Add new models" --rev-id 02
 01_initial_structure.py  
 02_add_new_models.py   
 
+
+pip install "fastapi-users[sqlalchemy]==13.0.0"
+
