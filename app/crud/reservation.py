@@ -5,6 +5,7 @@ from sqlalchemy import and_, select
 
 from app.crud.base import CRUDBase
 from app.models.reservation import Reservation
+from app.models.user import User
 
 
 class CRUDReservation(CRUDBase):
@@ -46,6 +47,16 @@ class CRUDReservation(CRUDBase):
         )
         reservations = reservations.scalars().all()
         return reservations
+
+    async def get_by_user(
+        self,
+        session: AsyncSession,
+        user: User,
+    ):
+        users_reservs = await session.execute(
+            select(Reservation).where(Reservation.user_id == user.id)
+        )
+        return users_reservs.scalars().all()
 
 
 reservation_crud = CRUDReservation(Reservation)

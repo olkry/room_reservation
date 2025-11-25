@@ -12,7 +12,7 @@ from app.api.endpoints.validators import (
     check_reservation_before_edit
 )
 from app.crud.reservation import reservation_crud
-from app.core.user import current_user
+from app.core.user import current_user, current_superuser
 from app.models import User
 
 router = APIRouter()
@@ -42,8 +42,13 @@ async def create_reservation(
     return new_reservation
 
 
-@router.get('/', response_model=list[ReservationDB])
+@router.get(
+        '/',
+        response_model=list[ReservationDB],
+        dependencies=[Depends(current_superuser)],
+    )
 async def get_all_reservations(session: SessionDep):
+    """Только для суперюзеров."""
     reservations = await reservation_crud.get_multi(session)
     return reservations
 
@@ -52,9 +57,11 @@ async def get_all_reservations(session: SessionDep):
 async def delete_reservation(
     reservation_id: int,
     session: SessionDep,
+    user: Annotated[User, Depends(current_user)],
 ):
+    """Для суперюзеров или создателей объекта бронирования."""
     reservation = await check_reservation_before_edit(
-        reservation_id, session
+        reservation_id, session, user
     )
     reservation = await reservation_crud.remove(
         reservation, session
@@ -67,9 +74,11 @@ async def update_reservation(
     reservation_id: int,
     obj_in: ReservationUpdate,
     session: SessionDep,
+    user: Annotated[User, Depends(current_user)],
 ):
+    """Для суперюзеров или создателей объекта бронирования."""
     reservation = await check_reservation_before_edit(
-        reservation_id, session
+        reservation_id, session, user
     )
     await check_reservation_intersections(
         **obj_in.model_dump(),
@@ -83,3 +92,18 @@ async def update_reservation(
         session=session,
     )
     return reservation
+
+
+@router.get(
+    '/my_reservations',
+    response_model=list[ReservationDB],
+    # Добавляем множество с полями, которые надо исключить из ответа.
+    response_model_exclude={'user_id'},
+)
+async def get_my_reservations(
+    session: SessionDep,
+    user: Annotated[User, Depends(current_user)]
+):
+    """Получает список всех бронирований для текущего пользователя."""
+    reservations = await reservation_crud.get_by_user(session, user)
+    return reservations
