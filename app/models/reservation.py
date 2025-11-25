@@ -11,6 +11,8 @@ class Reservation(CommonMixin, Base):
     to_reserve: Mapped[datetime] = mapped_column(DateTime)
     meetingroom_id: Mapped[int] = mapped_column(Integer,
                                                 ForeignKey('meetingroom.id'))
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'),
+                                         nullable=True)
 
     def __repr__(self):
         return (

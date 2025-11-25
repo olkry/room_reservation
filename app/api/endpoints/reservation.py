@@ -12,6 +12,8 @@ from app.api.endpoints.validators import (
     check_reservation_before_edit
 )
 from app.crud.reservation import reservation_crud
+from app.core.user import current_user
+from app.models import User
 
 router = APIRouter()
 
@@ -25,6 +27,8 @@ SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 async def create_reservation(
     reservation: ReservationCreate,
     session: SessionDep,
+    # Получаем текущего пользователя и сохраняем в переменную user.
+    user: Annotated[User, Depends(current_user)]
 ):
     await check_meeting_room_exists(
         reservation.meetingroom_id, session
@@ -33,7 +37,7 @@ async def create_reservation(
         **reservation.model_dump(), session=session
     )
     new_reservation = await reservation_crud.create(
-        reservation, session
+        reservation, session, user
     )
     return new_reservation
 
@@ -56,6 +60,7 @@ async def delete_reservation(
         reservation, session
     )
     return reservation
+
 
 @router.patch('/{reservation_id}', response_model=ReservationDB)
 async def update_reservation(
